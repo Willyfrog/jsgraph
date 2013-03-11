@@ -34,7 +34,7 @@ function start () {
     user_canvas.height = APP.HEIGHT;
     user_canvas.width = APP.WIDTH;
     user_canvas.id = "usercanvas";
-    user_canvas.oncontextmenu="return false";
+    user_canvas.oncontextmenu=function () {return false;};
 
     div_canvas.appendChild(user_canvas);
 
