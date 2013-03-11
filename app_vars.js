@@ -1,3 +1,5 @@
 var APP = {
-    HEIGHT: 800,
-    WIDTH: 800};
+  HEIGHT: 800,
+  WIDTH: 800,
+  REFRESH_RATE: 15
+};

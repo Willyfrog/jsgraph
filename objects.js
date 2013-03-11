@@ -18,6 +18,44 @@ function reset_canvas(canvas){
     canvas.width = canvas.width;
 }
 
+
+function getMouseCoords(e) {
+  var coords = {x:0, y:0};
+  //depending on the browser it's processed differently
+  //getting the coordinates within the document
+  if (e.pageX != undefined && e.pageY != undefined) {
+	coords.x = e.pageX;
+	coords.y = e.pageY;
+  }
+  else {
+	coords.x = e.clientX + document.body.scrollLeft +
+	  document.documentElement.scrollLeft;
+	coords.y = e.clientY + document.body.scrollTop +
+	  document.documentElement.scrollTop;
+  }
+
+	//and relative to the canvas position:
+  var cnv = document.getElementById('usercanvas');
+  coords.x -= cnv.offsetLeft;
+  coords.y -= cnv.offsetTop;
+
+  return coords;
+  };
+
+function processMouseClick (scene, e) {
+  var coords = getMouseCoords(e);
+  if (e.button==2) {
+	scene.rightMousePressed(coords);
+    console.log("right click");
+  }
+  else {
+	//this.leftMousePressed(coords);
+    scene.rightMousePressed(coords);
+    console.log("left click");
+  }
+  e.stopPropagation();
+};
+
 var Scene = function (name, user_canvas, fixed_canvas) {
     this.name = name;
     this.user_canvas = user_canvas;
@@ -33,16 +71,18 @@ var Scene = function (name, user_canvas, fixed_canvas) {
 	}
 	reset_canvas(this.user_canvas);
 	//put the other canvas
-	this.user_canvas.drawImage(this.fixed_canvas, 0, 0);
+	var ctx = this.user_canvas.getContext("2d");
+	ctx.drawImage(this.fixed_canvas, 0, 0);
 	//draw temporary resources
     };
 
     this.addTempNode = function (x, y) {
-	
+
     };
 
     this.addFixedNode = function (node) {
-	this.fixed_node.push(node);
+	  this.fixed_node.push(node);
+      this.have_to_draw_fixed = true;
     };
 
     this.drawFixed = function () {
@@ -71,63 +111,31 @@ var Scene = function (name, user_canvas, fixed_canvas) {
 	ctx.stroke();
     };
 
-    this.rightMousePressed = function (coords) {
+  this.rightMousePressed = function (coords) {
 	//override to treat properly ;)
-	this.addFixedNode(new Node(coords.x, coords.y));
-    };
+    var node = new Point(coords.x, coords.y);
+	this.addFixedNode(node);
+  };
 
-    this.leftMousePressed = function (coords) {
+  this.leftMousePressed = function (coords) {
 	//override to treat properly ;)
-    };
-    
-    this.getMouseCoords = function (e) {
-	var coords = {x:0, y:0};
-	//depending on the browser it's processed differently
-	//getting the coordinates within the document
-	if (e.pageX != undefined && e.pageY != undefined) {
-	    coords.x = e.pageX;
-	    coords.y = e.pageY;
-	}
-	else {
-	    coords.x = e.clientX + document.body.scrollLeft +
-		document.documentElement.scrollLeft;
-	    coords.y = e.clientY + document.body.scrollTop +
-		document.documentElement.scrollTop;
-	}
-    
-	//and relative to the canvas position:
-	var cnv = document.getElementById('usercanvas');
-	coords.x -= cnv.offsetLeft;
-	coords.y -= cnv.offsetTop;
+  };
 
-	return coords;
+  this.registerEvents = function() {
+    console.log("registering events");
+    var self = this; //js pasa el objeto que recibio el evento como origen de this
+	this.user_canvas.addEventListener("click", function (e) {processMouseClick(self, e) }, false);
+  };
 
-    };
-
-    this.processMouseClick = function (e) {
-	var coords = this.getMouseCoords(e);
-	if (e.button==2) {
-	    this.rightMousePressed(coords);
-	}
-	else {
-	    this.leftMousePressed(coords);
-	}
-	e.stopPropagation();
-    };
-
-    this.registerEvents = function() {
-	this.user_canvas.addEventListener("click", this.processMouse, false);
-    };
-
-    this.unregisterEvents = function() {
-	this.user_canvas.removeEventListener("click", this.processMouse, false);
-    };
+  this.unregisterEvents = function() {
+	this.user_canvas.removeEventListener("click", this.processMouseClick, false);
+  };
 
 };
 
 var SceneManager = function() {
     this.scenes = {};
-    
+
     this.addScene = function (name, user_canvas, fixed_canvas) {
 	if (!(name in this.scenes)) {
 	    this.scenes[name] = new Scene(name, user_canvas, fixed_canvas);
@@ -135,7 +143,7 @@ var SceneManager = function() {
 	}
 	return false;
     };
-    
+
     this.getScene = function (name) {
 	if (this.scenes.hasOwnProperty(name)) {
 	    return this.scenes[name];

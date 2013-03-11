@@ -11,7 +11,15 @@ function processMouse(e) {
     else {
 	scene.leftMouse(coords);
     }
-    
+
+}
+
+function draw_loop() {
+  var curr_scene = APP.scenes.getScene(APP.current_scene);
+  curr_scene.draw();
+  if (APP.running==true){
+    window.setTimeout(draw_loop, APP.REFRESH_RATE);
+  }
 }
 
 function start () {
@@ -29,13 +37,14 @@ function start () {
     user_canvas.oncontextmenu="return false";
 
     div_canvas.appendChild(user_canvas);
-    
+
     APP.scenes = new SceneManager();
     var main_scene = APP.scenes.addScene("Main", user_canvas, fixed_canvas);
     main_scene.registerEvents();
-    main_scene.drawFixed();
-    APP.current_scene = main_scene.name;
 
+    APP.current_scene = main_scene.name;
+  APP.running = true;
+  window.setTimeout(draw_loop, APP.REFRESH_RATE);
 }
 
 window.onload=start;
