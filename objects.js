@@ -125,7 +125,7 @@ var Scene = function (name, user_canvas, fixed_canvas) {
   this.registerEvents = function() {
     console.log("registering events");
     var self = this; //js pasa el objeto que recibio el evento como origen de this
-	this.user_canvas.addEventListener("mousedown", function (e) {processMouseClick(self, e) }, false);
+	this.user_canvas.addEventListener("mousedown", function (e) {processMouseClick(self, e); }, false);
   };
 
   this.unregisterEvents = function() {
