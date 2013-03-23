@@ -39,7 +39,7 @@ function start () {
     div_canvas.appendChild(user_canvas);
 
     APP.scenes = new SceneManager();
-    var main_scene = APP.scenes.addScene("Main", user_canvas, fixed_canvas);
+    var main_scene = APP.scenes.addScene("Main", user_canvas, fixed_canvas, Scene);
     main_scene.registerEvents();
 
     APP.current_scene = main_scene.name;
